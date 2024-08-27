@@ -1,8 +1,11 @@
+import re
+
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, URLField
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 
+pattern = re.compile(r"(?P<head>https?://\w{1,16})")
 
 class CutURLForm(FlaskForm):
     original_link = URLField(
@@ -14,8 +17,8 @@ class CutURLForm(FlaskForm):
     custom_id = URLField(
         'Вариант короткой ссылки',
         validators=[
-            DataRequired(message='Обязательное поле'),
-            Length(1, 16),
+            Length(0, 16),
+            Regexp(regex=pattern, message='Недопустимые символы для ссылки'),
             Optional()
         ]
     )

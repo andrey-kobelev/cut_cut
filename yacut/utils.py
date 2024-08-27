@@ -3,10 +3,9 @@ import re
 
 
 class URLEncoder:
-    pattern = re.compile(r"(?P<head>https?://[\w.-]+/)")
+    pattern = re.compile(r"(?P<head>https?://)")
 
-    def __init__(self, model, original_url=None, short_url=None):
-        self.short_url = short_url
+    def __init__(self, model, original_url=None):
         self.url = original_url
         self.model = model
 
@@ -18,7 +17,7 @@ class URLEncoder:
                 'QWERTYUASDFGHJKLZXCVBNM'
                 '1234567890'
             ),
-            k=4
+            k=8
         ))
 
     def encode(self):
@@ -27,6 +26,3 @@ class URLEncoder:
         while self.model.query.filter_by(short=short_url).first() is not None:
             short_url = f'{head}{self.get_code()}'
         return short_url
-
-    def decode(self):
-        return self.model.query.get(short=self.short_url).original
