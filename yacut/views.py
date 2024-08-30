@@ -1,11 +1,10 @@
-from crypt import methods
-
-from flask import abort, flash, redirect, render_template, url_for
+from flask import flash, redirect, render_template
 
 from . import app, db
 from .forms import CutURLForm
 from .models import URLMap
 from .utils import URLEncoder
+from .constants import SHORT_LINK_EXISTS, SHORT_LINK_CATEGORY
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -14,7 +13,10 @@ def index_view():
     if form.validate_on_submit():
         short = form.custom_id.data
         if short and URLMap.query.filter_by(short=short).first() is not None:
-            flash('Такая ссылка уже существует! Попробуйте дрогой вариант', 'link-exists')
+            flash(
+                SHORT_LINK_EXISTS,
+                SHORT_LINK_CATEGORY
+            )
             return render_template('index.html', form=form)
         if not short:
             short = URLEncoder(
@@ -27,12 +29,11 @@ def index_view():
         )
         db.session.add(url_map)
         db.session.commit()
-        return redirect(url_for('url_map_view', id=url_map.id))
+        return render_template('url_map.html', form=form, url_map=url_map)
     return render_template('index.html', form=form)
 
 
-@app.route('/show-url/<int:id>')
+@app.route('/<path:id>')
 def url_map_view(id):
-    form = CutURLForm()
-    url_map = URLMap.query.get_or_404(id)
-    return render_template('url_map.html', form=form, url_map=url_map)
+    url = URLMap.query.filter_by(short=id).first_or_404()
+    return redirect(url.original)
