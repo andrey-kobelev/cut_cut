@@ -7,10 +7,10 @@ from .constants import (
     ORIGINAL_LABEL,
     REQUIRED_ORIGINAL_FIELD,
     SHORT_LABEL,
-    MIN_SHORT_LENGTH,
-    MAX_SHORT_LENGTH,
+    SHORT_MAX_LENGTH,
     INCORRECT_SHORT_NAME,
-    SUBMIT_NAME
+    SUBMIT_NAME,
+    ORIGINAL_MAX_LENGTH
 )
 
 
@@ -19,12 +19,13 @@ class CutURLForm(FlaskForm):
         ORIGINAL_LABEL,
         validators=[
             DataRequired(message=REQUIRED_ORIGINAL_FIELD),
+            Length(max=ORIGINAL_MAX_LENGTH)
         ]
     )
     custom_id = URLField(
         SHORT_LABEL,
         validators=[
-            Length(MIN_SHORT_LENGTH, MAX_SHORT_LENGTH),
+            Length(max=SHORT_MAX_LENGTH),
             Regexp(
                 regex=PATTERN_FOR_SHORT,
                 message=INCORRECT_SHORT_NAME
