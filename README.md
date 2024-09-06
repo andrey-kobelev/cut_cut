@@ -1,4 +1,6 @@
 # YaCut
+>Проект YaCut — это сервис укорачивания ссылок. Его назначение — ассоциировать длинную пользовательскую ссылку с короткой, которую предлагает сам пользователь или предоставляет сервис.
+
 ## Автор 
 - Кобелев Андрей Андреевич  
     - [email](mailto:andrey.pydev@gmail.com)
@@ -66,36 +68,46 @@ Press CTRL+C to quit
 
 ## Справка
 
-```bash
-flask --help
+### Инструкции для пользователя сайта
+
+Пользовательский интерфейс сервиса — одна страница с формой. Форма должна состоит из двух полей:
+
+- обязательного для длинной исходной ссылки;
+- необязательного для пользовательского варианта короткой ссылки.
+
+Пользовательский вариант короткой ссылки не должен превышать 16 символов.
+Формат для короткой ссылки — символы, в качестве которых можно использовать:
+
+- большие латинские буквы,
+- маленькие латинские буквы,
+- цифры в диапазоне от 0 до 9.
+
+Если вы не заполните поле со своим вариантом короткой ссылки, то сервис сгенирирует её автоматически. Например, сервис может предложить вот такой вариант: http://127.0.0.1:5000/4GhKH3.
+
+
+### Инструкции для использования API
+
+Сервис обслуживает только два эндпоинта:
+
+- _/api/id/_ — POST-запрос на создание новой короткой ссылки;
+- _/api/id/<short_id>/_ — GET-запрос на получение оригинальной ссылки по указанному короткому идентификатору.
+
+##### Пример POST-запроса
+
+**Request body:**
+
+```json
+{
+  "url": "string",
+  "custom_id": "string"
+}
 ```
 
-```
-Usage: flask [OPTIONS] COMMAND [ARGS]...
+**Responses:**
 
-  A general utility script for Flask applications.
-
-  An application to load must be given with the '--app' option, 'FLASK_APP'
-  environment variable, or with a 'wsgi.py' or 'app.py' file in the current
-  directory.
-
-Options:
-  -e, --env-file FILE   Load environment variables from this file. python-
-                        dotenv must be installed.
-  -A, --app IMPORT      The Flask application or factory function to load, in
-                        the form 'module:name'. Module can be a dotted import
-                        or file path. Name is not required if it is 'app',
-                        'application', 'create_app', or 'make_app', and can be
-                        'name(args)' to pass arguments.
-  --debug / --no-debug  Set debug mode.
-  --version             Show the Flask version.
-  --help                Show this message and exit.
-
-Commands:
-  db      Perform database migrations.
-  routes  Show the routes for the app.
-  run     Run a development server.
-  shell   Run a shell in the app context.
-
-
+```json
+{
+  "url": "string",
+  "short_link": "string"
+}
 ```

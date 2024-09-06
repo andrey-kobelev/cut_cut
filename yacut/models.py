@@ -1,25 +1,21 @@
 import random
 import re
 from datetime import datetime
-from http import HTTPStatus
 
-from flask import url_for, abort
+from flask import url_for
+from werkzeug.exceptions import NotFound
 
 from yacut import db
 from .constants import (
-    EMPTY_BODY,
-    REQUIRED_URL_FIELD,
     PATTERN_FOR_SHORT,
-    INCORRECT_SHORT_NAME,
-    LETTERS_FOR_CODE,
-    LENGTH_FOR_CODE_GENERATE,
-    SHORT_LINK_EXISTS,
-    SHORT_ID_NOT_EXISTS,
+    LETTERS_FOR_SHORT,
+    LENGTH_FOR_SHORT_GENERATE,
     SHORT_MAX_LENGTH,
     ORIGINAL_MAX_LENGTH,
-    URL_MAP_VIEW_NAME
+    URL_MAP_VIEW_NAME,
+    NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT
 )
-from .error_handlers import InvalidAPIUsage
+from .exceptions import IncorrectShort, ShortExists
 
 
 class URLMap(db.Model):
@@ -39,61 +35,36 @@ class URLMap(db.Model):
         )
 
     @staticmethod
-    def is_short_exists(short):
-        return URLMap.query.filter_by(short=short).first() is not None
+    def get_url_map(short, not_found_exception=False):
+        url_map = URLMap.query.filter_by(short=short).first()
+        if not_found_exception and url_map is None:
+            raise NotFound()
+        return url_map
 
     @staticmethod
-    def get_code():
-        return ''.join(random.choices(
-            population=LETTERS_FOR_CODE,
-            k=LENGTH_FOR_CODE_GENERATE
-        ))
+    def get_short():
+        for _ in range(NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT):
+            short = ''.join(random.choices(
+                population=LETTERS_FOR_SHORT,
+                k=LENGTH_FOR_SHORT_GENERATE
+            ))
+            if URLMap.get_url_map(short) is None:
+                return short
 
     @staticmethod
-    def encode(get_code):
-        short = get_code()
-        while URLMap.is_short_exists(short):
-            short = get_code()
-        return short
-
-    @staticmethod
-    def add_url(data, api=False):
-        if api:
-            if not data:
-                raise InvalidAPIUsage(EMPTY_BODY)
-            if 'url' not in data:
-                raise InvalidAPIUsage(REQUIRED_URL_FIELD)
-            if 'custom_id' in data:
-                short = data['custom_id']
+    def add_url(original, short, incorrect_short_error=False):
+        if short:
+            if incorrect_short_error:
                 if (
-                    not re.fullmatch(PATTERN_FOR_SHORT, short)
-                    or len(short) > SHORT_MAX_LENGTH
+                    len(short) > SHORT_MAX_LENGTH
+                    or not re.fullmatch(PATTERN_FOR_SHORT, short)
                 ):
-                    raise InvalidAPIUsage(INCORRECT_SHORT_NAME)
-                if URLMap.is_short_exists(short):
-                    raise InvalidAPIUsage(
-                        SHORT_LINK_EXISTS
-                    )
-        if 'custom_id' not in data or not data['custom_id']:
-            short = URLMap.encode(URLMap.get_code)
+                    raise IncorrectShort()
+            if URLMap.get_url_map(short) is not None:
+                raise ShortExists()
         else:
-            short = data['custom_id']
-        original = data[
-            'original_link'
-        ] if 'original_link' in data else data['url']
+            short = URLMap.get_short()
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()
         return url_map
-
-    @staticmethod
-    def get_url(short, api=False):
-        url = URLMap.query.filter_by(short=short).first()
-        if url is None:
-            if api:
-                raise InvalidAPIUsage(
-                    SHORT_ID_NOT_EXISTS, HTTPStatus.NOT_FOUND
-                )
-            else:
-                abort(HTTPStatus.NOT_FOUND)
-        return url
