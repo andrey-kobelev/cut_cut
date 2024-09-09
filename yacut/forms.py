@@ -3,7 +3,7 @@ from wtforms import SubmitField, URLField
 from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 from .constants import (
-    PATTERN_FOR_SHORT,
+    SHORT_PATTERN,
     ORIGINAL_LABEL,
     REQUIRED_ORIGINAL_FIELD,
     SHORT_LABEL,
@@ -27,7 +27,7 @@ class CutURLForm(FlaskForm):
         validators=[
             Length(max=SHORT_MAX_LENGTH),
             Regexp(
-                regex=PATTERN_FOR_SHORT,
+                regex=SHORT_PATTERN,
                 message=INCORRECT_SHORT_NAME
             ),
             Optional()

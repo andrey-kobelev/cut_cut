@@ -3,19 +3,21 @@ import re
 from datetime import datetime
 
 from flask import url_for
-from werkzeug.exceptions import NotFound
 
 from yacut import db
 from .constants import (
-    PATTERN_FOR_SHORT,
-    LETTERS_FOR_SHORT,
+    SHORT_PATTERN,
+    SHORT_CHARACTERS,
     LENGTH_FOR_SHORT_GENERATE,
     SHORT_MAX_LENGTH,
     ORIGINAL_MAX_LENGTH,
     URL_MAP_VIEW_NAME,
-    NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT
+    NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT,
+    INCORRECT_SHORT_NAME,
+    SHORT_EXISTS,
+    BAD_ORIGINAL_LENGTH
 )
-from .exceptions import IncorrectShort, ShortExists
+from .exceptions import YaCutBaseException
 
 
 class URLMap(db.Model):
@@ -23,6 +25,15 @@ class URLMap(db.Model):
     original = db.Column(db.String(ORIGINAL_MAX_LENGTH))
     short = db.Column(db.String(SHORT_MAX_LENGTH), unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    class ShortExists(YaCutBaseException):
+        pass
+
+    class IncorrectShort(YaCutBaseException):
+        pass
+
+    class BadURLLength(YaCutBaseException):
+        pass
 
     def to_dict(self):
         return dict(
@@ -35,35 +46,37 @@ class URLMap(db.Model):
         )
 
     @staticmethod
-    def get_url_map(short, not_found_exception=False):
-        url_map = URLMap.query.filter_by(short=short).first()
-        if not_found_exception and url_map is None:
-            raise NotFound()
-        return url_map
+    def get_url_map(short):
+        return URLMap.query.filter_by(short=short).first()
 
     @staticmethod
-    def get_short():
+    def generate_short():
+        short = None
         for _ in range(NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT):
             short = ''.join(random.choices(
-                population=LETTERS_FOR_SHORT,
+                population=SHORT_CHARACTERS,
                 k=LENGTH_FOR_SHORT_GENERATE
             ))
-            if URLMap.get_url_map(short) is None:
-                return short
+            if not URLMap.get_url_map(short):
+                break
+        if not short:
+            return URLMap.generate_short()
+        return short
 
     @staticmethod
-    def add_url(original, short, incorrect_short_error=False):
+    def add_url(original, short):
         if short:
-            if incorrect_short_error:
-                if (
-                    len(short) > SHORT_MAX_LENGTH
-                    or not re.fullmatch(PATTERN_FOR_SHORT, short)
-                ):
-                    raise IncorrectShort()
-            if URLMap.get_url_map(short) is not None:
-                raise ShortExists()
+            if (
+                len(short) > SHORT_MAX_LENGTH
+                or not re.fullmatch(SHORT_PATTERN, short)
+            ):
+                raise URLMap.IncorrectShort(INCORRECT_SHORT_NAME)
+            if URLMap.get_url_map(short):
+                raise URLMap.ShortExists(SHORT_EXISTS)
         else:
-            short = URLMap.get_short()
+            short = URLMap.generate_short()
+        if len(original) > ORIGINAL_MAX_LENGTH:
+            raise URLMap.BadURLLength(BAD_ORIGINAL_LENGTH)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)
         db.session.commit()

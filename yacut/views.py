@@ -1,13 +1,10 @@
 from http import HTTPStatus
 
 from flask import flash, redirect, render_template, abort
-from werkzeug.exceptions import NotFound
 
 from . import app
 from .forms import CutURLForm
 from .models import URLMap
-from .constants import SHORT_EXISTS
-from .exceptions import ShortExists
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -18,23 +15,28 @@ def index_view():
     short = form.custom_id.data
     original = form.original_link.data
     try:
-        url_map = URLMap.add_url(original=original, short=short)
-    except ShortExists:
+        return render_template(
+            'index.html',
+            form=form,
+            short_link=URLMap.add_url(
+                original=original,
+                short=short
+            ).to_dict()['short_link']
+        )
+    except (
+        URLMap.ShortExists,
+        URLMap.BadURLLength,
+        URLMap.IncorrectShort
+    ) as error:
         flash(
-            SHORT_EXISTS
+            error.message
         )
         return render_template('index.html', form=form)
-    return render_template(
-        'index.html',
-        form=form,
-        short_link=url_map.to_dict()['short_link']
-    )
 
 
 @app.route('/<path:short>')
 def url_map_view(short):
-    try:
-        url_map = URLMap.get_url_map(short=short, not_found_exception=True)
-    except NotFound:
+    url_map = URLMap.get_url_map(short=short)
+    if not url_map:
         abort(HTTPStatus.NOT_FOUND)
     return redirect(url_map.original)
