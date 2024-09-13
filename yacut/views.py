@@ -28,9 +28,7 @@ def index_view():
         URLMap.BadURLLength,
         URLMap.IncorrectShort
     ) as error:
-        flash(
-            error.message
-        )
+        flash(str(error))
         return render_template('index.html', form=form)
 
 

@@ -37,7 +37,8 @@ def create_short():
             URLMap.add_url(
                 original=data['url'],
                 short=short,
+                validation=True
             ).to_dict()
         ), HTTPStatus.CREATED
     except (URLMap.IncorrectShort, URLMap.ShortExists) as error:
-        raise InvalidAPIUsage(error.message)
+        raise InvalidAPIUsage(str(error))

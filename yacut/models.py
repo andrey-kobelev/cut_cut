@@ -17,7 +17,6 @@ from .constants import (
     SHORT_EXISTS,
     BAD_ORIGINAL_LENGTH
 )
-from .exceptions import YaCutBaseException
 
 
 class URLMap(db.Model):
@@ -26,13 +25,13 @@ class URLMap(db.Model):
     short = db.Column(db.String(SHORT_MAX_LENGTH), unique=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    class ShortExists(YaCutBaseException):
+    class ShortExists(Exception):
         pass
 
-    class IncorrectShort(YaCutBaseException):
+    class IncorrectShort(Exception):
         pass
 
-    class BadURLLength(YaCutBaseException):
+    class BadURLLength(Exception):
         pass
 
     def to_dict(self):
@@ -51,22 +50,18 @@ class URLMap(db.Model):
 
     @staticmethod
     def generate_short():
-        short = None
         for _ in range(NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT):
             short = ''.join(random.choices(
                 population=SHORT_CHARACTERS,
                 k=LENGTH_FOR_SHORT_GENERATE
             ))
             if not URLMap.get_url_map(short):
-                break
-        if not short:
-            return URLMap.generate_short()
-        return short
+                return short
 
     @staticmethod
-    def add_url(original, short):
+    def add_url(original, short, validation=False):
         if short:
-            if (
+            if validation and (
                 len(short) > SHORT_MAX_LENGTH
                 or not re.fullmatch(SHORT_PATTERN, short)
             ):
@@ -75,7 +70,7 @@ class URLMap(db.Model):
                 raise URLMap.ShortExists(SHORT_EXISTS)
         else:
             short = URLMap.generate_short()
-        if len(original) > ORIGINAL_MAX_LENGTH:
+        if validation and len(original) > ORIGINAL_MAX_LENGTH:
             raise URLMap.BadURLLength(BAD_ORIGINAL_LENGTH)
         url_map = URLMap(original=original, short=short)
         db.session.add(url_map)

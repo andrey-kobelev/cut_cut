@@ -1,6 +1,7 @@
 import re
 from string import ascii_letters, digits
 
+
 SHORT_CHARACTERS = ascii_letters + digits
 SHORT_PATTERN = re.compile(f'[{SHORT_CHARACTERS}]*')
 REQUIRED_ORIGINAL_FIELD = 'Обязательное поле'
@@ -21,6 +22,9 @@ REQUIRED_URL_FIELD = '"url" является обязательным полем
 
 URL_MAP_VIEW_NAME = 'url_map_view'
 
-BAD_ORIGINAL_LENGTH = 'Длина оригинальной ссылки превышает норму'
+BAD_ORIGINAL_LENGTH = (
+    f'Длина оригинальной ссылки должна '
+    f'быть не более {ORIGINAL_MAX_LENGTH} символов.'
+)
 
 NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT = 10
