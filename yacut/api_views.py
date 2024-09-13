@@ -42,6 +42,7 @@ def create_short():
     except (
         URLMap.IncorrectShort,
         URLMap.ShortExists,
-        URLMap.BadURLLength
+        URLMap.BadURLLength,
+        URLMap.FailGenerateShort
     ) as error:
         raise InvalidAPIUsage(str(error))

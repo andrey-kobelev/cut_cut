@@ -12,21 +12,17 @@ def index_view():
     form = CutURLForm()
     if not form.validate_on_submit():
         return render_template('index.html', form=form)
-    short = form.custom_id.data
-    original = form.original_link.data
     try:
         return render_template(
             'index.html',
             form=form,
             short_link=URLMap.add_url(
-                original=original,
-                short=short
+                original=form.original_link.data,
+                short=form.custom_id.data
             ).to_dict()['short_link']
         )
     except (
-        URLMap.ShortExists,
-        URLMap.BadURLLength,
-        URLMap.IncorrectShort
+        URLMap.ShortExists, URLMap.FailGenerateShort
     ) as error:
         flash(str(error))
         return render_template('index.html', form=form)

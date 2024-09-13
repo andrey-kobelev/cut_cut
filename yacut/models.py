@@ -15,7 +15,8 @@ from .constants import (
     NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT,
     INCORRECT_SHORT_NAME,
     SHORT_EXISTS,
-    BAD_ORIGINAL_LENGTH
+    BAD_ORIGINAL_LENGTH,
+    FAIL_GENERATE_SHORT
 )
 
 
@@ -32,6 +33,9 @@ class URLMap(db.Model):
         pass
 
     class BadURLLength(Exception):
+        pass
+
+    class FailGenerateShort(Exception):
         pass
 
     def to_dict(self):
@@ -57,6 +61,7 @@ class URLMap(db.Model):
             ))
             if not URLMap.get_url_map(short):
                 return short
+        raise URLMap.FailGenerateShort(FAIL_GENERATE_SHORT)
 
     @staticmethod
     def add_url(original, short, validation=False):

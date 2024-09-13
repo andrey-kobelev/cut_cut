@@ -27,4 +27,9 @@ BAD_ORIGINAL_LENGTH = (
     f'быть не более {ORIGINAL_MAX_LENGTH} символов.'
 )
 
+FAIL_GENERATE_SHORT = (
+    'Не удалось сгенерировать короткую ссылку. '
+    'Повторите запрос через минуту.'
+)
+
 NUM_ITERATIONS_FOR_FIND_UNIQUE_SHORT = 10
