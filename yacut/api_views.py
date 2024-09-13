@@ -31,14 +31,17 @@ def create_short():
     data = request.get_json()
     if 'url' not in data:
         raise InvalidAPIUsage(REQUIRED_URL_FIELD)
-    short = data.get('custom_id', '')
     try:
         return jsonify(
             URLMap.add_url(
                 original=data['url'],
-                short=short,
+                short=data.get('custom_id', ''),
                 validation=True
             ).to_dict()
         ), HTTPStatus.CREATED
-    except (URLMap.IncorrectShort, URLMap.ShortExists) as error:
+    except (
+        URLMap.IncorrectShort,
+        URLMap.ShortExists,
+        URLMap.BadURLLength
+    ) as error:
         raise InvalidAPIUsage(str(error))
