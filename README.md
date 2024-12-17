@@ -16,11 +16,11 @@
 Клонировать репозиторий и перейти в него в командной строке:  
   
 ```  
-git clone https://github.com/andrey-kobelev/yacut.git
+git clone https://github.com/andrey-kobelev/cut_cut.git
 ```  
   
 ```  
-cd yacut
+cd cut_cut
 ```  
   
 Cоздать и активировать виртуальное окружение:  
@@ -50,7 +50,7 @@ pip install -r requirements.txt
 ..$ flask shell
 Python 3.9.2 (v3.9.2:1a79785e3e, Feb 19 2021, 09:09:00) 
 [Clang 12.0.0 (clang-1200.0.32.29)] on darwin
-App: opinions_app [development]
+App: cut_cut [development]
 Instance: /Users/username/dev/what_to_watch/instance
 >>> from opinions_app import db
 >>> db.create_all()
@@ -73,7 +73,7 @@ flask run
 В терминале должно появиться примерно такое сообщение
 
 ```
- * Serving Flask app 'yacut'
+ * Serving Flask app 'cut_cut'
  * Debug mode: on
 WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
  * Running on http://127.0.0.1:5000
