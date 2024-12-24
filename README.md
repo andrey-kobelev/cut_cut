@@ -6,7 +6,7 @@
     - [email](mailto:andrey.pydev@gmail.com)
   
 ## Технологии  
-- [Python](https://www.python.org/)
+- [Python3.9](https://www.python.org/downloads/release/python-390/)
 - [Flask](https://flask.palletsprojects.com/en/3.0.x/)
 - [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/)
 - [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/)
