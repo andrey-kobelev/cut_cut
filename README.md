@@ -53,7 +53,7 @@ Python 3.9.2 (v3.9.2:1a79785e3e, Feb 19 2021, 09:09:00)
 [Clang 12.0.0 (clang-1200.0.32.29)] on darwin
 App: cut_cut [development]
 Instance: /Users/username/dev/what_to_watch/instance
->>> from opinions_app import db
+>>> from yacut import db
 >>> db.create_all()
 ```
 
