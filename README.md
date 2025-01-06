@@ -5,7 +5,7 @@
 
 ## Автор 
 - Кобелев Андрей Андреевич  
-    - [email](mailto:andrey.pydev@gmail.com)
+    - [email](mailto:andrew.a.kobelev@yandex.ru)
   
 ## Технологии  
 - [Python3.9](https://www.python.org/downloads/release/python-390/)
